@@ -44,10 +44,12 @@ EOF
 Let's deploy the new configuration:
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/clusters/production-ready-secured.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/clusters/production-ready-secured.yaml
 ----
 
-The `plain` listener is now configured to use the `SCRAM` challenge mechanism for connecting clients.
+Watch for the changes in the stateful set.
+Once all pods have been restarted, you can proceed.
+The `plain` listener is now configured to use the `SCRAM-SHA-512` challenge mechanism for connecting clients.
 
 === Creating users and ACLs
 
@@ -68,16 +70,16 @@ spec:
   authorization:
     type: simple
     acls:
-      # Example consumer Acls for topic secureTopic using consumer group
+      # Example consumer Acls for topic lines using consumer group
       - resource:
           type: topic
-          name: secure-topic
+          name: lines
           patternType: literal
         operation: Read
         host: "*"
       - resource:
           type: topic
-          name: secure-topic
+          name: lines
           patternType: literal
         operation: Describe
         host: "*"
@@ -92,12 +94,12 @@ spec:
 Let's apply this new configuration.
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/users/secure-topic-reader.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/users/secure-topic-reader.yaml
 ----
 
-The newly created user can read the metadata of topic `test-topic` and consume (read) from it with the consumer group `test-group`.
+The newly created user can read the metadata of topic `lines` and consume (read) from it with the consumer group `secure-group`.
 
-But now we need a user that can produce data to `test-topic`!
+But now we need a user that can produce data to `lines`!
 Let's create a new resource:
 
 ----
@@ -113,10 +115,10 @@ spec:
   authorization:
     type: simple
     acls:
-      # Example Producer Acls for topic secure-topic
+      # Example Producer Acls for topic lines
       - resource:
           type: topic
-          name: secure-topic
+          name: lines
           patternType: literal
         operation: Write
         host: "*"
@@ -124,13 +126,19 @@ spec:
 
 And let's apply this new configuration.
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/users/secure-topic-writer.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/users/secure-topic-writer.yaml
 ----
 
 Go to `Secrets` and observe that new secret named `secure-topic-reader` and `secure-topic-writer` have been created.
 Both secrets have a field named `password`.
 
-Now let's redeploy our running applications.
+Now let's redeploy our running applications by running on the OpenShift cluster.
+
+----
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/applications/timer-producer.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/applications/log-consumer.yaml
+----
+
 Looking at the logs, we see a lot of errors - the clients cannot connect anymore.
 
 We need to reconfigure the running apps:
@@ -173,7 +181,7 @@ spec:
 Now let's deploy this new configuration.
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/applications/timer-producer-secured.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/applications/timer-producer-secured.yaml
 ----
 
 We need to secure the `log-consumer` application as well:
@@ -219,7 +227,7 @@ spec:
 Let's apply this new configuration:
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/applications/log-consumer-secured.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/applications/log-consumer-secured.yaml
 ----
 
 Inspect the log of `log-consumer` again.

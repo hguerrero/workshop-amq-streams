@@ -13,7 +13,7 @@ Configuring your Kafka cluster depends on a number of factors, and in particular
 * Making sure that your Zookeeper ensemble has at least 3 nodes
 * Making sure that the data of your Kafka cluster is persistent
 
-Our ephemeral cluster created in the previous module meets some but not all of these criteria: it has the minimum number of nodes for both Kafka and Zookeeper, but it not persistent.
+Our ephemeral cluster created in the previous module meets some but not all of these criteria: it has the minimum number of nodes for both Kafka and Zookeeper, but it is not persistent.
 Plus, we really had no control over sizing - we just used a default!
 
 === Configuring the size of your Kafka cluster deployments
@@ -50,7 +50,7 @@ spec:
 Let's take a look at a few of the cluster properties.
 The cluster has:
 
-* a name: `metadata.name: my-cluster`
+* a name: `metadata.name: simple-cluster`
 * a number of kafka replicas: `spec.kafka.replicas: 1`
 * storage configuration for the Kafka cluster: `spec.kafka.storage: ephemeral`
 * configurations for listeners and configuration parameters for the brokers (e.g. replication settings)
@@ -94,7 +94,7 @@ spec:
       transaction.state.log.min.isr: 2
     storage:
       type: persistent-claim
-      size: 20Gi
+      size: 3Gi
       deleteClaim: false
   zookeeper:
     replicas: 3
@@ -110,7 +110,7 @@ spec:
 Let's deploy this new resource.
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/clusters/production-ready.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/clusters/production-ready.yaml
 ----
 
 The cluster `production-ready` has the minimal settings for a highly available, persistent cluster.
@@ -146,7 +146,7 @@ spec:
       transaction.state.log.min.isr: 2
     storage:
       type: persistent-claim
-      size: 20Gi
+      size: 3Gi
       deleteClaim: false
   zookeeper:
     replicas: 3
@@ -163,14 +163,14 @@ Notice the only change being the number of nodes.
 Let's apply this new configuration:
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/clusters/production-ready-5-nodes.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/clusters/production-ready-5-nodes.yaml
 ----
 
 Notice the number of pods of the Kafka cluster increasing to 5 and the corresponding persistent claims.
 Now let's scale down the cluster again.
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/clusters/production-ready.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/clusters/production-ready.yaml
 ----
 
 Notice the number of pods of the Kafka cluster decreasing back to 3.
@@ -179,7 +179,7 @@ What does this mean?
 Let's scale up the cluster again.
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/clusters/production-ready-5-nodes.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/clusters/production-ready-5-nodes.yaml
 ----
 
 Notice the number of pods increasing back to 5 and the corresponding persistent volume claims being reallocated to the existing nodes.
@@ -188,5 +188,5 @@ This means that the newly started instances will resume from where the previous 
 Three broker nodes will be sufficient for our lab, so we can scale things down again:
 
 ----
-oc apply -f https://raw.githubusercontent.com/mbogoevici/workshop-amq-streams/master/configurations/clusters/production-ready.yaml
+oc apply -f https://raw.githubusercontent.com/RedHatWorkshops/workshop-amq-streams/master/configurations/clusters/production-ready.yaml
 ----
